@@ -48,7 +48,9 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		p = &Page{Title: title}
 	}
 
+	// Parsefiles reads the contents of edit.html and returns a pointer *template.Template
 	t, _ := template.ParseFiles("edit.html")
+	// Execute writes generated HTML to the http.ResponseWriter "w". In the html {{.Title}} refers to p.Title
 	t.Execute(w, p)
 }
 
