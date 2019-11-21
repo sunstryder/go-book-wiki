@@ -35,11 +35,15 @@ func loadPage(title string) (*Page, error) {
 
 // our handlers all take in responseWriter and request pointer params
 
+func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
+	t, _ := template.ParseFiles(tmpl + ".html")
+	t.Execute(w, p)
+}
+
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Path[len("/view/"):]
 	p, _ := loadPage(title)
-	t, _ := template.ParseFiles(("view.html"))
-	t.Execute(w, p)
+	renderTemplate(w, "view", p)
 }
 
 func editHandler(w http.ResponseWriter, r *http.Request) {
@@ -48,11 +52,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		p = &Page{Title: title}
 	}
-
-	// Parsefiles reads the contents of edit.html and returns a pointer *template.Template
-	t, _ := template.ParseFiles("edit.html")
-	// Execute writes generated HTML to the http.ResponseWriter "w". In the html {{.Title}} refers to p.Title
-	t.Execute(w, p)
+	renderTemplate(w, "edit", p)
 }
 
 func saveHandler(w http.ResponseWriter, r *http.Request) {
