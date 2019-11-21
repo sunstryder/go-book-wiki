@@ -16,7 +16,7 @@ type Page struct {
 // saves Page body to a text file named "title.txt" This is a method and not a func because it ˙has a receiver
 func (p *Page) save() error {
 	filename := p.Title + ".txt"
-	return ioutil.WriteFile(filename, p.Body, 0600) // the 0600 is a octo literall indicating this file has read-write permission for current user only.
+	return ioutil.WriteFile(filename, p.Body, 0600) // the 0600 is a octo literal indicating this file has read-write permission for current user only.
 }
 
 // function local to this package, lowercase first letter to indicate that it's not exported.
@@ -35,8 +35,16 @@ func loadPage(title string) (*Page, error) {
 // our handlers all take in responseWriter and request pointer params
 
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	t, _ := template.ParseFiles(tmpl + ".html")
-	t.Execute(w, p)
+	t, err := template.ParseFiles(tmpl + ".html")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = t.Execute(w, p)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
@@ -71,6 +79,6 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/view/", viewHandler)
 	http.HandleFunc("/edit/", editHandler)
-	http.HandleFunc("/save/", editHandler)
+	http.HandleFunc("/save/", saveHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
