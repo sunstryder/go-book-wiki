@@ -42,7 +42,13 @@ func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Path[len("/view/"):]
-	p, _ := loadPage(title)
+	p, err := loadPage(title)
+	// If the page doesn't exist, redirect to edit page to add the page.
+	if err != nil {
+		// Redirect function adds status code 302 and Location header to the response.
+		http.Redirect(w, r, "/edit/"+title, http.StatusFound)
+		return
+	}
 	renderTemplate(w, "view", p)
 }
 
