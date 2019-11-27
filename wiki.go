@@ -13,6 +13,9 @@ type Page struct {
 	Body  []byte // this means "byte slice". Body is of this type because our io libraries use this type, not string
 }
 
+// instead of parsing files every time, we will parse all templates into single template and execute at the beginning.
+var templates = template.Must(template.ParseFiles("edit.html", "view.html"))
+
 // saves Page body to a text file named "title.txt" This is a method and not a func because it ˙has a receiver
 func (p *Page) save() error {
 	filename := p.Title + ".txt"
@@ -35,16 +38,10 @@ func loadPage(title string) (*Page, error) {
 // our handlers all take in responseWriter and request pointer params
 
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	t, err := template.ParseFiles(tmpl + ".html")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err = t.Execute(w, p)
+	err := templates.ExecuteTemplate(w, tmpl+".html", p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
